@@ -1,5 +1,4 @@
-# RL
-Reinforcement Learning Study Repository
+# Reinforcement Learning Study Repository
 
 # 참고서적
 1. 단단한 강화학습
