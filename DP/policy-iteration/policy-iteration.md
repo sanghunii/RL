@@ -1,7 +1,7 @@
 # Policy Iteration for Dynamic programming
 
 ### process
-1. Policy Evaluation -> find state value $v_\pi(s)$for each state
+1. Policy Evaluation -> find state value $v_\pi(s)$ for each state
 2. Policy Improvement -> based on found value $v_\pi(s)$, improvement policy
 3. repeat.
 
