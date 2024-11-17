@@ -12,6 +12,7 @@
 
 1. Initiation
  모든 s \in S에 대해 임의로 v(s) \in \R와 \pi(s) \in A(s)를 설정
+ theta 설정 (허용 오차값)
  
  
  2. Policy Evaluation ##현재 정책 \pi에 대한 최적 상태 가치 함수의 근사값을 구한다. 
@@ -20,6 +21,9 @@
 	  모든 s \in S에 대한 루프:
 		  v <- V(s)
 		  V(s) <- \sum_{s',r}p(s',r|s,\pi(s))[r+\gamma V(s')]
+		  delta <- max(delta, |v-V(s)|)
+		  delta < theta를 만족하면 Policy Evaluation을 종료하고 Policy Improvement로 넘어감
+
 		  
 		  
 3. Policy Improvement ##새로운 정책 \pi'의 가치를 계산하고 이전 정책 \pi의 가치와 비교 
