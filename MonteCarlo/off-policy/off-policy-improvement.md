@@ -1,6 +1,8 @@
 # Off-policy MonteCarloMethod for optimize target policy
 ## Use Weighted Importance Sampling for evaluating value of target policy
 
+### 이 알고리즘은 optimal policy를 찾아내기 위한 알고리즘이다.
+
 off-polcy MC는 기본적으로 두 개의 정책을 사용한다.
 
 b : behavior policy로 해당 정책을 이용해서 에피소드를 생성하고 각 state에 대한 이득값을 도출해 낸다.
