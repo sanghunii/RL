@@ -1,4 +1,4 @@
-# Off-policy MonteCarloMethod
+# Off-policy MonteCarloMethod for optimize target policy
 ## Use Weighted Importance Sampling for evaluating value of target policy
 
 off-polcy MC는 기본적으로 두 개의 정책을 사용한다.
