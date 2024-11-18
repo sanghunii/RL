@@ -10,8 +10,8 @@
 
 여기서는 아래와 같이 정책이 정의된다.
 
-$$\pi(a|s)=\begin{cases}1-\epsilon+\frac{\epsilon}{|A(s)|} (for&nbsp;greedy&nbsp;action) \\
-\frac{\epsilon}{|A(s)|} (for&nbsp;not&nbsp;greedy&nbsp;actions)\end{cases} $$
+$$\pi(a|s)=\begin{cases}1-\epsilon+\frac{\epsilon}{|A(s)|} (for-greedy-action) \\
+\frac{\epsilon}{|A(s)|} (for-not-greedy-actions)\end{cases} $$
 
 
 ### pseudo
