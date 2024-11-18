@@ -10,4 +10,4 @@
 
 여기서는 아래와 같이 정책이 정의된다.
 
-$$asdfasdf$$
+$$pi(a|s)=\begin{cases}1-\epsilon+\frac{\epsilon}{|A(s)|} \\ \fr
