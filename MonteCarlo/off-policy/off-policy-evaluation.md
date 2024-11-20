@@ -35,3 +35,6 @@ input = 임의의 target policy pi
         W = 0이면 루프 종료 
   	
 ```
+
+
+출처 - 단단한 강화학습
