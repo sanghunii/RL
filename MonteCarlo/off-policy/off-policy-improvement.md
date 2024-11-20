@@ -34,3 +34,5 @@ $\rho_{t:T(t)-1}$ : 중요도 추출 비율(importance sampling ratio)이다.이
 		A_t \neq \pi(S_t)이면 루프 종료
 		W = W*(1/b(A_t|S_t)
 ```
+
+출처 - 단단한 강화학습
