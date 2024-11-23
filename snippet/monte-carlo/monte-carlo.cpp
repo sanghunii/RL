@@ -45,6 +45,7 @@ int main() {
     int roof_size_1000 = 1000;
     int roof_size_10000 = 10000;
     int roof_size_100000 = 100000;
+    int roof_size_1000000 = 1000000;
     /*
     for (int i = 0; i < roof_size_1000) {
         new MonteCarlo();
@@ -53,16 +54,16 @@ int main() {
    
    int ct_inner = 0;
 
-   for (int i = 0; i < roof_size_1000; i++) { 
+   for (int i = 0; i < roof_size_1000000; i++) { 
     MonteCarlo * mc = new MonteCarlo();
     if (mc->ret_dist() <= 1.00)
         ct_inner++;
     delete mc;
-    cout << endl << endl;
    }
 
-   float area = (float)(4 * ct_inner) / ((float)roof_size_1000);
-   cout << area << endl;
+   float area = (float)(4 * ct_inner) / ((float)roof_size_1000000);
+   cout << "sampling 횟수 : " << roof_size_1000000 << endl;
+   cout << "원의 넓이 추정 값 : "  << area <<  endl;
 
    return 0;
 }
