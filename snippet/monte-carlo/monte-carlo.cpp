@@ -18,7 +18,7 @@ class MonteCarlo {
     };
 
 MonteCarlo::MonteCarlo() {
-    srand(time(0)* rand() / rand());  
+    srand(time(0)* rand() / rand());            
     x = (float)rand()/(float)INT32_MAX;
     y = (float)rand()/(float)INT32_MAX;
 
@@ -46,13 +46,8 @@ int main() {
     int roof_size_10000 = 10000;
     int roof_size_100000 = 100000;
     int roof_size_1000000 = 1000000;
-    /*
-    for (int i = 0; i < roof_size_1000) {
-        new MonteCarlo();
-    }
-    */
-   
-   int ct_inner = 0;
+
+    int ct_inner = 0;  //범위안에 들어간 난수 갯수 체크 
 
    for (int i = 0; i < roof_size_1000000; i++) { 
     MonteCarlo * mc = new MonteCarlo();
