@@ -41,24 +41,28 @@ int main() {
     using std::cout;
     using std::endl;
 
-    
+    /*
     int roof_size_1000 = 1000;
     int roof_size_10000 = 10000;
     int roof_size_100000 = 100000;
-    int roof_size_1000000 = 1000000;
+    */
+    int roof_size = 100000000;
 
     int ct_inner = 0;  //범위안에 들어간 난수 갯수 체크 
 
-   for (int i = 0; i < roof_size_1000000; i++) { 
+   for (int i = 0; i < roof_size; i++) { 
     MonteCarlo * mc = new MonteCarlo();
     if (mc->ret_dist() <= 1.00)
         ct_inner++;
     delete mc;
    }
 
-   float area = (float)(4 * ct_inner) / ((float)roof_size_1000000);
-   cout << "sampling 횟수 : " << roof_size_1000000 << endl;
+   float area = (float)(4 * ct_inner) / ((float)roof_size);
+   cout << "sampling 횟수 : " << roof_size << endl;
    cout << "원의 넓이 추정 값 : "  << area <<  endl;
 
    return 0;
 }
+
+//무조건 많은 수를 sampling하는건 좋지 않은듯 하다.
+//sampling 횟수를 늘려도 계산 시간은 늘어나지만 성능은 유의미하게 늘어나지 않는 지점이 분명히 존재한다. 
