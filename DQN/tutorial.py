@@ -77,7 +77,7 @@ TAU = 0.005
 LR = 1e-4
 
 # gym 행동 공간에서 행동의 숫자를 얻는다.
-n_actions = env.action_space
+n_actions = env.action_space.n
 
 # 상태 관측 횟수를 얻는다. 
 state, info = env.reset()
@@ -93,7 +93,7 @@ memory = ReplayMemory(10000)
 steps_done = 0
 
 def select_action(state):
-    global steps_done
+    global steps_done #steps_done은 함수 밖에서 선언된 전역변수
     sample = random.random()
     eps_threshold = EPS_END + (EPS_START - EPS_END) * \
         math.exp(-1. * steps_done / EPS_DECAY)
@@ -106,6 +106,35 @@ def select_action(state):
             return policy_net(state).max(1).indices.view(1,1)
     else:
         return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
+    
 
+episode_duration = []
+
+def plot_durations(show_result = False):
+    plt.figure(1)
+    durations_t = torch.tensor(episode_duration, dtype=torch.float)
+    if show_result:
+        plt.title('Result')
+    else:
+        plt.clf()
+        plt.title('Training...')
+    plt.xlabel('Episode')
+    plt.ylabel('Duration')
+    plt.plot(durations_t.numpy())
+    # 100개의 에피소드 평균을 가져와서 도표 그리기
+    if len(durations_t) >= 100:
+        means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
+        means = torch.cat((torch.zeros(99), means))
+        plt.plot(means.numpy())
+    
+    plt.pause(0.001)
+    if is_ipython:
+        if not show_result:
+            display.display(plt.gcf())
+            display.clear_output(wait=True)
+        else:
+            display.display(plt.gcf())
+
+# 최종적으로 모델 학습을 위한 코드.
 # TODO
-"""함수 내에 globa로 선언하면 이거 어떻게 사용할 수 있는지 그리고 select_action()함수가 어떻게 작동하는지 알아보고 넘어가기 """
+"""plot_duration 작동방식 파악 """
