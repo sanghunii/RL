@@ -135,6 +135,48 @@ def plot_durations(show_result = False):
         else:
             display.display(plt.gcf())
 
+
 # 최종적으로 모델 학습을 위한 코드.
-# TODO
-"""plot_duration 작동방식 파악 """
+def optimize_model():
+    if len(memory) < BATCH_SIZE:
+        return
+    
+    ##replay memory에서 학습을 위한 data를 꺼낸다.
+    transitions = memory.sample(batch_size=BATCH_SIZE) 
+    batch = Transition(*zip(*transitions))  ## 이거 어떻게 돌아가는지 작동방식 잘 설명할 수 있는지 스스로 체크
+
+    # 최종이 아닌 상태의 마스크를 계산하고 배치 요소를 연결
+    # (최종 상태는 시물레이션이 종료 된 이후의 상태)
+    non_final_mask = torch.tensor(tuple(map(lambda s : s is not None,
+                                            batch.next_state)), device = device, dtype=torch.bool)
+    non_final_next_states = torch.cat([s for s in batch.next_state
+                                       if s is not None])
+    state_batch = torch.cat(batch.state)
+    action_batch = torch.cat(batch.action)
+    reward_batch = torch.cat(batch.reward)
+
+    # Q(s_t,a)계산 - 모델이 Q(s_t)를 계산하고, 취한 행동의 열을 선택합니다.
+    # 이들은 policy_net에 따라 각 배치 상태에 대해 선택된 행동입니다.
+    state_action_values = policy_net(state_batch).gather(1, action_batch)
+
+    # 모든 다음 상태를 위한 V(s_{t+1}) 계산
+    # non_final_next_states의 행동들에 대한 기대값은 "이전" target_net을 기반으로 계산됩니다.
+    # max(1).values로 최고의 보상을 선택하십시오.
+    # 이것은 마스크를 기반으로 병합되어 기대 상태 값을 갖거나 상태가 최종인 경우 0을 갖습니다.
+    next_state_values = torch.zeros(BATCH_SIZE, device=device)
+    with torch.no_grad():
+        next_state_values[non_final_mask] = target_net(non_final_next_states).max(1).values()
+
+    #기대 Q값 계산
+    expected_state_action_values = (next_state_values * GAMMA) + reward_batch
+
+    # Huber 손실 계산
+    criterion = nn.SmoothL1Loss()
+    loss = criterion(state_action_values, expected_state_action_values.unsqueeze(1))
+
+    # 모델 최적화 
+    optimizer.zero_grad()
+    loss.backward()
+    # 변화도 클리핑 바꿔치기 
+    torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100)
+    optimizer.step()
