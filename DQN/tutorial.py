@@ -13,6 +13,8 @@ import torch.nn.functional as F
 
 env = gym.make("CartPole-v1")
 
+
+
 # set for matplotlib 
 is_ipython = 'inline' in matplotlib.get_backend()
 if is_ipython:
@@ -20,6 +22,8 @@ if is_ipython:
 
 # set for use gup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 
 
 
@@ -44,11 +48,12 @@ class ReplayMemory(object):
         return len(self.memory)
 
 
-class DQN(nn.Module):
 
+
+class DQN(nn.Module):
     def __init__(self, n_observations, n_actions):
         super(DQN, self).__init__()
-        self.layer1 = nn.Linear(n_observations, 128) ##input layer
+        self.layer1 = nn.Linear(n_observations, 128) ##input layer 
         self.layer2 = nn.Linear(128, 128)
         self.layer3 = nn.Linear(128, n_actions)
 
@@ -177,6 +182,7 @@ def optimize_model():
     # 모델 최적화 
     optimizer.zero_grad()
     loss.backward()
+
     # 변화도 클리핑 바꿔치기 
     torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100)
     optimizer.step()
