@@ -15,8 +15,6 @@ class Network(nn.Module):
         self.n_states = n_states
         self.n_actions = n_actions
         self.linear = nn.Linear(in_features=n_states, out_features=self.n_actions)
-        """self.linear에 input feature랑 output feature를 굳이 이렇게 안해도 될듯?
-        또한 nn.Linear말고 Conv1d사용하는 것도 한번 고려해 보자."""
 
     def forward(self, x):
         x = torch.Tensor(x) if not torch.is_tensor(x) else x
