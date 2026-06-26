@@ -105,3 +105,11 @@ class PrioritizedReplayBuffer:
             "n_entries": self.tree.n_entries,
             "max_priority": self.max_priority
         }
+    
+    def load_state(self, state_dict):
+        """저장된 상태 정보를 불러와서 복구"""
+        self.tree.tree = state_dict["tree"]
+        self.tree.data = state_dict["data"]
+        self.tree.write = state_dict["write"]
+        self.tree.n_entries = state_dict["n_entries"]
+        self.max_priority = state_dict.get("max_priority", 1.0)
