@@ -6,7 +6,7 @@ from torch.optim import SGD
 import numpy as np
 import random
 from typing import Tuple, List
-from per_buffer import PrioritizedReplayBuffer
+from value_base.per.per_buffer import PrioritizedReplayBuffer
 
 class Network(nn.Module):
     def __init__(self, n_states, n_actions):
@@ -71,7 +71,7 @@ for i in range(num_episode):
     while not done and step < max_step:
         global_step += 1
         
-        # 1. Action 선택 (데이터 수집 시 model.eval() 명시)
+        # 1. Action 선택 
         q_network.eval()
         if random.random() < exploration_prob:
             action = env.action_space.sample()  
@@ -90,7 +90,7 @@ for i in range(num_episode):
 
         # 4. 샘플링 및 학습 프로세스
         if replay_buffer.tree.n_entries >= batch_size:
-            q_network.train() # 학습 모드 전환
+            q_network.train()
             
             # Beta값 Linear Annealing 계산
             beta = min(beta_end, beta_start + (beta_end - beta_start) * (global_step / total_steps))
