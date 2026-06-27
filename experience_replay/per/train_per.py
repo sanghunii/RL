@@ -6,7 +6,7 @@ from torch.optim import SGD
 import numpy as np
 import random
 from typing import Tuple, List
-from value_base.per.per_buffer import PrioritizedReplayBuffer
+from experience_replay.per.per_buffer import PrioritizedReplayBuffer
 
 class Network(nn.Module):
     def __init__(self, n_states, n_actions):

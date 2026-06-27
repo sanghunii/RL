@@ -3,7 +3,7 @@ from typing import Tuple, List
 import random
 import torch
 
-from value_base.per.sumtree import SumTree
+from experience_replay.per.sumtree import SumTree
 
 # IS(Importance Sampling)을 이용해서 Priority base sampling으로 인해 발생하는 Bias를 해결해야 한다.
 # alpha값이랑 beta값 어떻게 annealing할지 정해야함. -> Linear Annealing 적용

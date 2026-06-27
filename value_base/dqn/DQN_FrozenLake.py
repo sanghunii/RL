@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import SGD
 import numpy as np
+from typing import List
+import matplotlib.pyplot as plt
 
 from experience_replay.replay_buffer import ReplayBuffer
 
@@ -42,10 +44,10 @@ env = gymnasium.make('FrozenLake-v1', is_slippery=False)
 n_states = env.observation_space.n
 n_actions = env.action_space.n
 
-num_episode = 10000
+num_episode = 5000
 max_step = 100  
 
-# [변경사항 2] Epsilon Decay 로직을 위한 파라미터 셋팅
+
 exploration_prob = 1.0         # 처음에는 100% 확률로 랜덤 탐험
 min_exploration_prob = 0.01    # 아무리 학습이 끝나도 1%의 엉뚱한 행동(탐험)은 남겨둠
 exploration_decay = 0.999      # 매 판마다 탐험률을 0.999배씩 감소 (10,000판 기준 넉넉한 감쇠율)
@@ -64,6 +66,8 @@ target_network.load_state_dict(q_network.state_dict())
 optimizer = SGD(params=q_network.parameters(), lr=lr)
 replay_buffer = ReplayBuffer(capacity=buffer_capacity)
 
+
+results: List[int] = []
 
 # 4. Training Loop
 for i in range(num_episode):
@@ -121,8 +125,27 @@ for i in range(num_episode):
     
     exploration_prob = max(min_exploration_prob, exploration_prob * exploration_decay)
     
-    # [변경사항 4] 터미널 과부하 방지를 위해 100 에피소드마다 출력
-    if (i + 1) % 100 == 0:
-        print(f"Episode {i + 1:5d} | Total Reward: {all_reward:.1f} | Epsilon: {exploration_prob:.3f}")
+    if (i + 1) % 500 == 0:
+        results.append(all_reward)
+        if (i + 1) % 500 == 0:
+            print(f"Episode {i + 1:5d} | Total Reward: {all_reward:.1f} | Epsilon: {exploration_prob:.3f}")
 
 env.close()
+
+
+
+# Results
+episodes = [x * 100 for x in range(1, len(results) + 1)]
+
+plt.figure(figsize=(10, 6))
+plt.plot(episodes, results, linestyle='-', color='blue', alpha=0.7)
+
+plt.title('DQN Learning Curve - FrozenLake', fontsize=16, fontweight='bold')
+plt.xlabel('Learning Step (Episode)', fontsize=12)
+plt.ylabel('Total Reward', fontsize=12)
+plt.yticks([0.0, 1.0])
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+plt.savefig('value_base/dqn/learning_curve.png', dpi=300, bbox_inches='tight')
+
+plt.show()

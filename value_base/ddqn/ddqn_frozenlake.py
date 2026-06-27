@@ -4,11 +4,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import SGD
 import numpy as np
+from typing import List
+import matplotlib.pyplot as plt
 
 from experience_replay.replay_buffer import ReplayBuffer
 
 
-# 1. Define Network 
+
+# 1. Define Network (변경 없음)
 class Network(nn.Module):
     """
     DQN network for frozen-lake
@@ -37,15 +40,15 @@ class Network(nn.Module):
         return self.forward(state)
 
 
-# 2. ENV 및 Parameter 셋팅
+# 2. ENV 및 Parameter 셋팅 (변경 없음)
 env = gymnasium.make('FrozenLake-v1', is_slippery=False)
 n_states = env.observation_space.n
 n_actions = env.action_space.n
 
-num_episode = 10000
+num_episode = 5000
 max_step = 100  
 
-# [변경사항 2] Epsilon Decay 로직을 위한 파라미터 셋팅
+# Epsilon Decay 로직을 위한 파라미터 셋팅
 exploration_prob = 1.0         # 처음에는 100% 확률로 랜덤 탐험
 min_exploration_prob = 0.01    # 아무리 학습이 끝나도 1%의 엉뚱한 행동(탐험)은 남겨둠
 exploration_decay = 0.999      # 매 판마다 탐험률을 0.999배씩 감소 (10,000판 기준 넉넉한 감쇠율)
@@ -56,7 +59,7 @@ batch_size = 32
 buffer_capacity = 1000
 
 
-# 3. Model, Loss, Optimizer, Replay Buffer 생성
+# 3. Model, Loss, Optimizer, Replay Buffer 생성 (변경 없음)
 q_network = Network(n_states=n_states, n_actions=n_actions)
 target_network = Network(n_states=n_states, n_actions=n_actions)
 target_network.load_state_dict(q_network.state_dict())
@@ -65,7 +68,9 @@ optimizer = SGD(params=q_network.parameters(), lr=lr)
 replay_buffer = ReplayBuffer(capacity=buffer_capacity)
 
 
-# 4. Training Loop
+
+results: List[int] = []
+# 4. Training Loop (DDQN 로직 적용)
 for i in range(num_episode):
     current_state, _ = env.reset()
     all_reward = 0
@@ -103,8 +108,12 @@ for i in range(num_episode):
             q_value = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
             
             with torch.no_grad():
-                next_q_values = target_network(next_states)
-                max_next_q = next_q_values.max(1)[0]
+                next_q_values_main = q_network(next_states)
+                best_next_actions = next_q_values_main.argmax(dim=1, keepdim=True)  # (Batch, 1)
+
+                next_q_values_target = target_network(next_states)  
+                max_next_q = next_q_values_target.gather(1, best_next_actions).squeeze(1)   # best_next_action에 해당하는 Q-value들을 가져온다. 이후 squeeze(1)를 통해서 (Batch, 1) -> (Batch,)로 한차원 낮춰줘야한다.
+
                 target_q = rewards + gamma * max_next_q * (1 - dones)
             
             # Loss 계산 및 업데이트 (Huber Loss)
@@ -121,8 +130,28 @@ for i in range(num_episode):
     
     exploration_prob = max(min_exploration_prob, exploration_prob * exploration_decay)
     
-    # [변경사항 4] 터미널 과부하 방지를 위해 100 에피소드마다 출력
-    if (i + 1) % 100 == 0:
-        print(f"Episode {i + 1:5d} | Total Reward: {all_reward:.1f} | Epsilon: {exploration_prob:.3f}")
+
+    if (i + 1) % 500 == 0:
+        results.append(all_reward)
+        if (i + 1) % 500 == 0:
+            print(f"Episode {i + 1:5d} | Total Reward: {all_reward:.1f} | Epsilon: {exploration_prob:.3f}")
 
 env.close()
+
+
+
+# Results
+episodes = [x * 100 for x in range(1, len(results) + 1)]
+
+plt.figure(figsize=(10, 6))
+plt.plot(episodes, results, linestyle='-', color='blue', alpha=0.7)
+
+plt.title('DDQN Learning Curve - FrozenLake', fontsize=16, fontweight='bold')
+plt.xlabel('Learning Step (Episode)', fontsize=12)
+plt.ylabel('Total Reward', fontsize=12)
+plt.yticks([0.0, 1.0])
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+plt.savefig('value_base/ddqn/learning_curve.png', dpi=300, bbox_inches='tight')
+
+plt.show()
