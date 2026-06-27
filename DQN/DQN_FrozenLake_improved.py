@@ -70,11 +70,12 @@ for i in range(num_episode):
     step = 0
 
     while not done and step < max_step:
+        q_network.eval()
+        
         # Epsilon-Greedy
         if torch.rand(1) < epsilon:
             action = env.action_space.sample()
         else:
-            q_network.eval()
             with torch.no_grad():
                 Qs = q_network(current_state)
                 action = torch.argmax(Qs).item()
