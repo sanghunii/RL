@@ -125,7 +125,7 @@ for i in range(num_episode):
     
     exploration_prob = max(min_exploration_prob, exploration_prob * exploration_decay)
     
-    if (i + 1) % 500 == 0:
+    if (i + 1) % 100 == 0:
         results.append(all_reward)
         if (i + 1) % 500 == 0:
             print(f"Episode {i + 1:5d} | Total Reward: {all_reward:.1f} | Epsilon: {exploration_prob:.3f}")
