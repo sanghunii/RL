@@ -10,7 +10,6 @@ class DuelingQNetwork(nn.Module):
         
         dim1 = 256
         dim2 = 256 // 2
-        dim3 = 256 // 4
         dim_head = 256 // 8
         
         # === 1. shared network ====
@@ -20,14 +19,11 @@ class DuelingQNetwork(nn.Module):
 
             nn.Linear(dim1, dim2),
             nn.Mish(),
-
-            nn.Linear(dim2, dim3),
-            nn.Mish()
         )
         
         # === 2. Value Head  === 
         self.value_head = nn.Sequential(
-            nn.Linear(dim3, dim_head),
+            nn.Linear(dim2, dim_head),
             nn.Mish(),
 
             nn.Linear(dim_head, 1)
@@ -37,7 +33,7 @@ class DuelingQNetwork(nn.Module):
         # '이 상태에서 각 행동(Action 조합)을 취하는 것이 얼마나 더 이득인가?'를 평가하므로 
         # 출력은 조합된 총 경우의 수인 n_actions개입니다.
         self.adv_head = nn.Sequential(
-            nn.Linear(dim3, dim_head),
+            nn.Linear(dim2, dim_head),
             nn.Mish(),
 
             nn.Linear(dim_head, n_actions)
