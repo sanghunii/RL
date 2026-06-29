@@ -2,66 +2,56 @@ import torch
 import torch.nn as nn
 
 class DuelingQNetwork(nn.Module):
-    def __init__(self, n_states, n_actions):
+    def __init__(self, n_actions):
         super().__init__()
 
-        self.n_states = n_states
+        self.in_channels = 4
         self.n_actions = n_actions
+        dim_head = 128
         
-        dim1 = 256
-        dim2 = 256 // 2
-        dim_head = 256 // 8
-        
-        # === 1. shared network ====
         self.shared = nn.Sequential(
-            nn.Linear(self.n_states, dim1),
-            nn.Mish(),
-
-            nn.Linear(dim1, dim2),
-            nn.Mish(),
+            nn.Conv2d(self.in_channels, 32, kernel_size=8, stride=4),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=4, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1),
+            nn.ReLU(),
+            nn.Flatten() 
         )
         
-        # === 2. Value Head  === 
+        cnn_out_dim = 64 * 7 * 7
+
         self.value_head = nn.Sequential(
-            nn.Linear(dim2, dim_head),
-            nn.Mish(),
+            nn.Linear(cnn_out_dim, dim_head),
+            nn.ReLU(),
 
-            nn.Linear(dim_head, 1)
+            nn.Linear(dim_head, dim_head//2),
+            nn.ReLU(),
+
+            nn.Linear(dim_head//2, 1)
         )
 
-        # === 3. Advantage Head ===
-        # '이 상태에서 각 행동(Action 조합)을 취하는 것이 얼마나 더 이득인가?'를 평가하므로 
-        # 출력은 조합된 총 경우의 수인 n_actions개입니다.
         self.adv_head = nn.Sequential(
-            nn.Linear(dim2, dim_head),
-            nn.Mish(),
+            nn.Linear(cnn_out_dim, dim_head),
+            nn.ReLU(),
 
-            nn.Linear(dim_head, n_actions)
+            nn.Linear(dim_head, dim_head//2),
+            nn.ReLU(),
+
+            nn.Linear(dim_head//2, n_actions)
         )
-
 
     def forward(self, state):
         shared = self.shared(state)
         value = self.value_head(shared)
         advs = self.adv_head(shared)
-
         return value, advs
 
-
     def get_q_values(self, state):
-        """
-        Aggregating Module
-        
-        순전파 과정에서 계산한 V값과 전체 Action(조합된 경우의 수)의 Advantage 값을 조합해서 Q-value를 산출한다.
-        """
-        value, advs = self.forward(state=state)
-
-        # 1. 전체 Advantage value을 구하고 해당 평균값 이용해서 정규화
+        if state.dtype == torch.uint8:
+            state = state.float() / 255.0
+            
+        value, advs = self.forward(state)
         advs_mean = advs.mean(dim=-1, keepdim=True)
-        advs_normalized = advs - advs_mean      # (A(s,a)- E(A(s,a)))
-
-        # 2. Q(s,a) = V(s) + (A(s,a) - E(A(s,a)))
-        q = value + advs_normalized
-
-        # 3. return
+        q = value + (advs - advs_mean)
         return q
